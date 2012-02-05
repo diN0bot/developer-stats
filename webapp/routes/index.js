@@ -47,7 +47,9 @@ exports.oauth_code_callback = function(req, res){
 	var ghreq = https.request(options, function(ghres) {
 		ghres.setEncoding('utf8');
 		ghres.on('data', function (chunk) {
-			stats_page(req, res, chunk.split('&')[0].split('=')[1]);
+			var access_token = chunk.split('&')[0].split('=')[1];
+			//stats_page(req, res, access_token);
+			res.redirect('/devstats/stats/'+access_token);
 		});
 	});
 
