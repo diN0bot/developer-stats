@@ -2,4 +2,7 @@ extends layout
 
 block body
     h1 Developer Stats
-    p Welcome #{access_token}
+    p Number of open Pull Requests: #{number_pull_requests}
+
+    each user in user_stats
+        li #{user.username}: #{user.stats}
