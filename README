@@ -21,3 +21,8 @@ cd ~/developer-stats/webapp; node app.js
 ```
 
 Daemonizing node.js server: http://cuppster.com/2011/05/12/diy-node-js-server-on-amazon-ec2/
+
+```
+sudo /etc/init.d/nginx restart
+sudo supervisorctl restart node
+```

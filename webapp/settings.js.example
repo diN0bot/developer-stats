@@ -4,3 +4,6 @@ exports.authorize_url = "https://github.com/login/oauth/authorize";
 exports.access_token_host = 'github.com';
 exports.access_token_port = 443;
 exports.access_token_path = '/login/oauth/access_token';
+
+exports.github_org = 'diN0bot';
+exports.github_repo = 'developer-stats';
