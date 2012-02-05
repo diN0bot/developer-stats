@@ -111,6 +111,7 @@ var stats_page = function(req, res, access_token){
 				ghres.on('end', function() {
 					closed_data = JSON.parse(closed_data);
 					context = pull_request_stats(open_data.concat(closed_data));
+					context.number_open = open_data.length;
 					res.render( 'stats', context );
 				});
 			}).on('error', function(e) {
@@ -153,7 +154,7 @@ var pull_request_stats = function(pull_requests) {
     created_at: '2011-12-23T19:45:34Z' }
 	 */
 	// maps user_name -> list of pull request dict
-	var context = { number_pull_requests: pull_requests.length }
+	var context = {}
 
 	var user_data = {};
 	for(var i = 0; i < pull_requests.length; i++) {
