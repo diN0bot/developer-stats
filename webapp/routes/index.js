@@ -41,7 +41,7 @@ exports.oauthcb = function(req, res){
 		ghres.setEncoding('utf8');
 		ghres.on('data', function (chunk) {
 			console.log('BODY: ' + chunk);
-			res.render('index', { access_token: chunk });
+			res.render('stats', { access_token: chunk });
 		});
 	});
 

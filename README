@@ -1,0 +1,23 @@
+
+```
+git clone git@github.com:diN0bot/developer-stats.git
+cd developer-stats
+```
+
+```
+sudo apt-get install node nodejs nginx
+sudo emacs /etc/nginx/sites-enabled/default
+```
+
+```
+location / {
+    proxy_pass          http://localhost:3000/;
+}
+```
+
+```
+sudo /etc/init.d/nginx start
+cd ~/developer-stats/webapp; node app.js
+```
+
+Daemonizing node.js server: http://cuppster.com/2011/05/12/diy-node-js-server-on-amazon-ec2/
