@@ -14,7 +14,7 @@ exports.index = function(req, res){
 
 exports.oauth_getcode = function(req, res){
 	res.redirect([settings.authorize_url,
-	              "?client_id=",
+	              "?scope=repo&client_id=",
 	              settings.client_id].join(""));
 }
 
