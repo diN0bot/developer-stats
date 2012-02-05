@@ -1,3 +1,7 @@
+Ideas: How many pull requests everyone has made, how long do they last, how many are closed
+but not merged, how many requests contain modifications to test files, etc.
+
+Assign points to everything, and present various leaderboards.
 
 ```
 git clone git@github.com:diN0bot/developer-stats.git
