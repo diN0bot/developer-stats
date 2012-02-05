@@ -112,6 +112,7 @@ var stats_page = function(req, res, access_token){
 					closed_data = JSON.parse(closed_data);
 					context = pull_request_stats(open_data.concat(closed_data));
 					context.number_open = open_data.length;
+					context.repo = settings.github_repo;
 					res.render( 'stats', context );
 				});
 			}).on('error', function(e) {
