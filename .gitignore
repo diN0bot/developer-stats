@@ -1,6 +1,2 @@
-node_modules
-closure-library
-*.pyc
 keys/*
 webapp/settings.js
-*.sqlite
