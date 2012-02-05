@@ -32,7 +32,8 @@ app.configure('production', function(){
 
 app.get('/', routes.index);
 app.get('/devstats/oauth_getcode', routes.oauth_getcode);
-app.get('/devstats/oauthcb', routes.oauthcb);
+app.get('/devstats/oauth_code_callback', routes.oauth_code_callback);
+app.get('/devstats/stats/:access_token', routes.stats);
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
