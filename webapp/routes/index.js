@@ -69,12 +69,13 @@ exports.stats = function(req, res){
 
 /* renders stats page */
 var stats_page = function(req, res, access_token){
+	// get open pull requests
 	var host = settings.github_api_host;
 	var path = ["/repos/",
 	            settings.github_org,
 	            "/",
 	            settings.github_repo,
-	            "/pulls?access_token=",
+	            "/pulls?per_page=100&access_token=",
 	            access_token].join("");
 	console.log("HOST: "+host);
 	console.log("PATH: "+path)
@@ -82,14 +83,40 @@ var stats_page = function(req, res, access_token){
 	https.get({ host: host, path: path }, function(ghres){
 		console.log("statusCode: ", ghres.statusCode);
 		ghres.setEncoding('utf8');
-		var data = '';
+		var open_data = '';
 		ghres.on('data', function(d) {
-			data += d;
+			open_data += d;
 		});
 		ghres.on('end', function() {
-			data = JSON.parse(data);
-			context = pull_request_stats(data);
-			res.render( 'stats', context );
+			open_data = JSON.parse(open_data);
+
+			// get last 100 cloased pull requests
+			var host = settings.github_api_host;
+			var path = ["/repos/",
+			            settings.github_org,
+			            "/",
+			            settings.github_repo,
+			            "/pulls?per_page=100&state=closed&access_token=",
+			            access_token].join("");
+			console.log("HOST: "+host);
+			console.log("PATH: "+path)
+
+			https.get({ host: host, path: path }, function(ghres){
+				console.log("statusCode: ", ghres.statusCode);
+				ghres.setEncoding('utf8');
+				var closed_data = '';
+				ghres.on('data', function(d) {
+					closed_data += d;
+				});
+				ghres.on('end', function() {
+					closed_data = JSON.parse(closed_data);
+					context = pull_request_stats(open_data.concat(closed_data));
+					res.render( 'stats', context );
+				});
+			}).on('error', function(e) {
+				console.error('Problem with request: ' + e.message);
+				res.render('error', { error: e.message });
+			});
 		});
 	}).on('error', function(e) {
 		console.error('Problem with request: ' + e.message);
@@ -141,13 +168,71 @@ var pull_request_stats = function(pull_requests) {
 	for (var username in user_data) {
 		per_user_stats.push({
 			'username': username,
-			stats: user_stats(user_data[username])
+			'stats': user_stats(user_data[username])
 		});
 	}
+	per_user_stats.sort(function(a, b) {
+		return a.stats.avg_total_life_span - b.stats.avg_total_life_span;
+	});
+
 	context.user_stats = per_user_stats;
 	return context;
 }
 
 var user_stats = function(pulls) {
-	return pulls.length;
+	// pull request counts
+	var number_pull_requests = pulls.length;
+	var number_merged = 0;
+	var number_stale = 0;
+	var number_tested = 0;
+	// commit counts
+	var number_commits = 0;
+	// avg times
+	var merged_life_span_time = 0; // against number_merged
+	var total_life_span_time = 0; // against number_pull_requests
+	var stale_time = 0; // against number_stale
+
+	var now = Date.now();
+	for(var i = 0; i < pulls.length; i++) {
+		var pull = pulls[i];
+		var created_at = Date.parse(pull.created_at);
+		var updated_at = Date.parse(pull.updated_at);
+		var merged_at = pull.merged_at;
+		var closed_at = pull.closed_at;
+		if (merged_at) { merged_at = Date.parse(merged_at); }
+		if (closed_at) { closed_at = Date.parse(closed_at); }
+
+		if (merged_at) {
+			number_merged++;
+			merged_life_span_time += (merged_at - created_at);
+		}
+		if (!merged_at && !closed_at) {
+			number_stale++;
+			stale_time += (now - updated_at);
+		}
+		if (closed_at) {
+			total_life_span_time += (closed_at - created_at);
+		} else {
+			total_life_span_time += (now - created_at);
+		}
+	}
+	return {
+		number_pull_requests: number_pull_requests,
+		number_merged: number_merged,
+		number_stale: number_stale,
+		number_tested: number_tested,
+		number_commits: number_commits,
+		avg_merged_life_span: avg_days(merged_life_span_time, number_merged),
+		avg_total_life_span: avg_days(total_life_span_time, number_pull_requests),
+		avg_stale_life_span: avg_days(stale_time, number_stale),
+		}
+}
+
+var avg_days = function(total_seconds, number) {
+	if (number) {
+		avg_seconds = total_seconds / number;
+		return (avg_seconds / 1000 / 60 / 60 / 24).toFixed(1);
+	} else {
+		return 0;
+	}
 }

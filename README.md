@@ -23,6 +23,13 @@ location / {
 }
 ```
 
+Personalize settings
+
+```
+cp webapp/settings.js.sample webapp/settings.js
+emacs webapp/settings.js
+```
+
 ```
 sudo /etc/init.d/nginx start
 cd ~/developer-stats/webapp; node app.js

@@ -4,5 +4,24 @@ block body
     h1 Developer Stats
     p Number of open Pull Requests: #{number_pull_requests}
 
-    each user in user_stats
-        li #{user.username}: #{user.stats}
+
+    table.table.table-bordered.table-striped
+        thead
+            tr
+                th username
+                th avg life span (days)
+                th of total
+                th avg merged life span (days)
+                th of # merged
+                th avg staleness (days since last updated)
+                th of # stale
+        tbody
+            each user in user_stats
+                tr
+                    td #{user.username}
+                    td.text-right #{user.stats.avg_total_life_span}
+                    td #{user.stats.number_pull_requests}
+                    td.text-right #{user.stats.avg_merged_life_span}
+                    td #{user.stats.number_merged}
+                    td.text-right #{user.stats.avg_stale_life_span}
+                    td #{user.stats.number_stale}
