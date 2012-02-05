@@ -4,7 +4,12 @@ var https = require('https');
 var querystring = require('querystring');
 
 exports.index = function(req, res){
-	res.render('index', { title: 'Index' })
+	res.render('index', {
+		title: 'Index',
+		gh_org: settings.github_org,
+		gh_repo: settings.github_repo,
+		access_url: '/devstats/oauth_getcode'
+	})
 };
 
 exports.oauth_getcode = function(req, res){
