@@ -6,13 +6,15 @@ block body
 
     if repos || orgs
         p Select a repository
-        each repo in repos
-            li <a href="/stats/#{repo.org}/#{repo.repo}/#{access_token}/">#{repo.org}/#{repo.repo}</a>
-        each ooo in orgs
-            each rrr in ooo
-                li <a href="/stats/#{rrr.org}/#{rrr.repo}/#{access_token}/">#{rrr.org}/#{rrr.repo}</a>
+        if repos
+            each repo in repos
+                li <a href="/stats/#{repo.org}/#{repo.repo}/#{access_token}/">#{repo.org}/#{repo.repo}</a>
+        if orgs
+            each ooo in orgs
+                each rrr in ooo
+                    li <a href="/stats/#{rrr.org}/#{rrr.repo}/#{access_token}/">#{rrr.org}/#{rrr.repo}</a>
     else
-        p Give me access to
+        p Give me access to 
             if org
                 #{org}/#{repo}? <a href="#{access_url}#{org}/#{repo}/">Click here.</a>
             else

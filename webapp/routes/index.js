@@ -7,12 +7,13 @@ var async = require('async');
 
 var blank_index_context = function() {
 	return {
-		title: "the Stats Index",
-		access_url: "/oauth_getcode/",
-		repo_objs: null,
-		access_token: null,
-		org: null,
-		repo: null
+                title: "the Stats Index",
+                access_url: "/oauth_getcode/",
+                repos: null,
+                orgs: null,
+                access_token: null,
+                org: null,
+                repo: null
 	}
 };
 

@@ -9,3 +9,5 @@ exports.github_org = 'diN0bot';
 exports.github_repo = 'developer-stats';
 exports.github_api_host = 'api.github.com';
 exports.github_api_port = 443;
+
+exports.stats_base_url = 'http://mydomain.com';
