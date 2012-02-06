@@ -18,10 +18,13 @@ eg,
 Other leaderboard ideas:
 
 - Small branches (number of commits/files/changes per pull request)
-- Giving reviews (leaderboard for commenting on pull requests, or possibly parsing pull request descriptions for "owning reviewer: xxx")
+- Giving reviews (leaderboard for non-pull-request-creator commenting on pull requests, or possibly parsing pull request descriptions for "owning reviewer: xxx")
 - Writing tests (file with "test" in path was added or updated)
 - Fixing defects (version one)
 - Getting stories done (version one)
+- Number of commits after the first non-pull-request-creator comment
+- Number of comments per user total
+- File specific things, like trailing whitespace
 
 Assign points to everything, as in http://twistedmatrix.com/highscores/
 
