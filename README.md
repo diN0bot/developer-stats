@@ -1,21 +1,47 @@
-Ideas: How many pull requests everyone has made, how long do they last, how many are closed
-but not merged, how many requests contain modifications to test files, etc.
 
-Assign points to everything, and present various leaderboards.
+## Demo
 
-Demo: http://ec2-107-20-75-182.compute-1.amazonaws.com
+http://game.rax.io/
 
-Local development: once you have an access_token, use: http://ec2-107-20-75-182.compute-1.amazonaws.com/devstats/stats/:access_token
+Currently implemented leaderboard:
+
+- Getting stuff done (number of pull requests and pull request life span)
+
+Share URLs with others: http://game.rax.io/idx/:org/:repo
+
+eg, 
+  - http://game.rax.io/idx/diN0bot/developer-stats
+  - http://game.rax.io/idx/HackThePlanet/developer-stats
+
+## Future
+
+Other leaderboard ideas:
+
+- Small branches (number of commits/files/changes per pull request)
+- Giving reviews (leaderboard for commenting on pull requests, or possibly parsing pull request descriptions for "owning reviewer: xxx")
+- Writing tests (file with "test" in path was added or updated)
+- Fixing defects (version one)
+- Getting stories done (version one)
+
+Assign points to everything, as in http://twistedmatrix.com/highscores/
+
+## Developer
+
+Get the code
 
 ```
 git clone git@github.com:diN0bot/developer-stats.git
 cd developer-stats
 ```
 
+Install stuff
+
 ```
 sudo apt-get install node nodejs nginx
 sudo emacs /etc/nginx/sites-enabled/default
 ```
+
+Maybe a sample nginx config should live in this repo
 
 ```
 location / {
@@ -29,6 +55,8 @@ Personalize settings
 cp webapp/settings.js.sample webapp/settings.js
 emacs webapp/settings.js
 ```
+
+**Run the server**
 
 ```
 sudo /etc/init.d/nginx start
