@@ -1,4 +1,3 @@
-
 ## Demo
 
 http://game.rax.io/
@@ -7,11 +6,12 @@ Currently implemented leaderboard:
 
 - Getting stuff done (number of pull requests and pull request life span)
 
-Share URLs with others: http://game.rax.io/idx/:org/:repo
+Share URLs with others: http://game.rax.io/idx/:org/:repo/
 
 eg, 
-  - http://game.rax.io/idx/diN0bot/developer-stats
-  - http://game.rax.io/idx/HackThePlanet/developer-stats
+
+- http://game.rax.io/idx/diN0bot/developer-stats/
+- http://game.rax.io/idx/HackThePlanet/developer-stats/
 
 ## Future
 
