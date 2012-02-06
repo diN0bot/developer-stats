@@ -2,24 +2,138 @@
 var settings = require('../settings');
 var https = require('https');
 var querystring = require('querystring');
+var async = require('async');
+
+
+var blank_index_context = function() {
+	return {
+		title: "the Stats Index",
+		access_url: "/oauth_getcode/",
+		repo_objs: null,
+		access_token: null,
+		org: null,
+		repo: null
+	}
+};
 
 exports.index = function(req, res){
-	res.render('index', {
-		title: 'Index',
-		gh_org: settings.github_org,
-		gh_repo: settings.github_repo,
-		access_url: '/devstats/oauth_getcode'
-	})
+	res.render('index', blank_index_context());
 };
+
+exports.index__accesss_token = function(req, res){
+	var access_token = req.params.access_token;
+	// list of dicts {org/user:, repo}
+	async.parallel([
+	                function(callback) {
+                        __repos_cb(req, res, access_token, callback);
+                        },
+                    function(callback) {
+                        __orgs_cb(req, res, access_token, callback);
+                        }
+    ], function(err, results) {
+		context = blank_index_context();
+		context.access_token = access_token;
+		context.access_url = "/oauth_getcode/";
+		context.repos = []
+		context.orgs = []
+		for (var i = 0; i < results.length; i++) {
+			context.repos = context.repos.concat(results[i].repos);
+			context.orgs = context.orgs.concat(results[i].orgs);
+		}
+		res.render('index', context);
+	});
+};
+
+var __repos_cb = function(req, res, access_token, callback) {
+	// get user repos
+	var repos = [];
+	get(
+		settings.github_api_host,
+		"/user/repos?access_token="+access_token,
+		function(data) {
+			for(var i = 0; i < data.length; i++) {
+				repos.push({
+					'org': data[i].owner.login,
+					'repo': data[i].name
+					});
+			}
+			callback(null, {'repos': repos, 'orgs': []})
+		});
+};
+
+var __orgs_cb = function(req, res, access_token, callback) {
+	// get orgs
+	get(
+		settings.github_api_host,
+		"/user/orgs?access_token="+access_token,
+		function(data) {
+			var cbs = [];
+			for(var i = 0; i < data.length; i++) {
+				cbs.push(function(d) {
+					return function(cb) {
+						__org_cb(req, res, access_token, d, cb);
+					}
+				}(data[i].login));
+			}
+			async.parallel(cbs, function(err, results) {
+				callback(null, {'orgs': results, 'repos': []});
+			});
+		});
+};
+
+var __org_cb = function(req, res, access_token, orgname, callback) {
+	// get repos for org
+	var repos = [];
+	get(
+		settings.github_api_host,
+		"/orgs/"+orgname+"/repos?access_token="+access_token,
+		function(data) {
+			for(var i = 0; i < data.length; i++) {
+				repos.push({
+					'org': data[i].owner.login,
+					'repo': data[i].name
+				});
+			}
+			callback(null, repos);
+		});
+};
+
+exports.index__org_repo = function(req, res){
+	context = blank_index_context();
+	context.org = req.params.org;
+	context.repo = req.params.repo;
+	res.render('index', context);
+};
+
+exports.index__org_repo_access_token = function(req, res){
+	stats_page(
+			req,
+			res,
+			req.params.org,
+			req.params.repo,
+			req.params.access_token);
+};
+
 
 /*
  * OAuth step 1.: Redirect user to github.
  * If user permits app access, callback will be called with 'code' parameter
  */
 exports.oauth_getcode = function(req, res){
-	res.redirect([settings.authorize_url,
-	              "?scope=repo&client_id=",
-	              settings.client_id].join(""));
+	url = [settings.authorize_url,
+           "?scope=repo&client_id=",
+           settings.client_id,
+           "&redirect_uri=",
+           settings.stats_base_url,
+           '/oauth_code_callback'];
+	if (req.params.org && req.params.repo) {
+		url.push('/');
+		url.push(req.params.org);
+		url.push('/');
+		url.push(req.params.repo);
+	}
+	url.push('/');
+	res.redirect(url.join(""));
 }
 
 /*
@@ -48,13 +162,24 @@ exports.oauth_code_callback = function(req, res){
 		ghres.setEncoding('utf8');
 		ghres.on('data', function (chunk) {
 			var access_token = chunk.split('&')[0].split('=')[1];
-			//stats_page(req, res, access_token);
-			res.redirect('/devstats/stats/'+access_token);
+			var url = [];
+			if (req.params.org && req.params.repo) {
+				url.push('/stats/');
+				url.push(req.params.org);
+				url.push('/');
+				url.push(req.params.repo);
+			} else {
+				url.push('/idx');
+			}
+			url.push('/');
+			url.push(access_token);
+			url.push('/');
+
+			res.redirect(url.join(""));
 		});
 	});
 
 	ghreq.on('error', function(e) {
-		console.error('Problem with request: ' + e.message);
 		res.render('error', { error: e.message });
 	});
 
@@ -64,17 +189,41 @@ exports.oauth_code_callback = function(req, res){
 }
 
 exports.stats = function(req, res){
-	stats_page(req, res, req.params.access_token);
+	stats_page(
+			req,
+			res,
+			req.params.org,
+			req.params.repo,
+			req.params.access_token);
 }
 
+var get = function(host, path, cb) {
+	console.log("HOST", host);
+	console.log("PATH", path);
+	https.get({ host: host, path: path }, function(res){
+		res.setEncoding('utf8');
+		var data = '';
+		res.on('data', function(d) {
+			data += d;
+		});
+		res.on('end', function() {
+			data = JSON.parse(data);
+			cb(data);
+		});
+	}).on('error', function(e) {
+		console.error('Problem with request: ' + e.message);
+		res.render('error', { error: e.message });
+	});
+};
+
 /* renders stats page */
-var stats_page = function(req, res, access_token){
+var stats_page = function(req, res, org, repo, access_token){
 	// get open pull requests
 	var host = settings.github_api_host;
 	var path = ["/repos/",
-	            settings.github_org,
+	            org,
 	            "/",
-	            settings.github_repo,
+	            repo,
 	            "/pulls?per_page=100&access_token=",
 	            access_token].join("");
 	console.log("HOST: "+host);
@@ -93,9 +242,9 @@ var stats_page = function(req, res, access_token){
 			// get last 100 cloased pull requests
 			var host = settings.github_api_host;
 			var path = ["/repos/",
-			            settings.github_org,
+			            org,
 			            "/",
-			            settings.github_repo,
+			            repo,
 			            "/pulls?per_page=100&state=closed&access_token=",
 			            access_token].join("");
 			console.log("HOST: "+host);
@@ -112,7 +261,8 @@ var stats_page = function(req, res, access_token){
 					closed_data = JSON.parse(closed_data);
 					context = pull_request_stats(open_data.concat(closed_data));
 					context.number_open = open_data.length;
-					context.repo = settings.github_repo;
+					context.repo = repo;
+					context.org = org;
 					res.render( 'stats', context );
 				});
 			}).on('error', function(e) {

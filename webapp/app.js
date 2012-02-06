@@ -31,9 +31,17 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', routes.index);
-app.get('/devstats/oauth_getcode', routes.oauth_getcode);
-app.get('/devstats/oauth_code_callback', routes.oauth_code_callback);
-app.get('/devstats/stats/:access_token', routes.stats);
+app.get('/idx/:access_token/', routes.index__accesss_token);
+app.get('/idx/:org/:repo/', routes.index__org_repo);
+app.get('/idx/:org/:repo/:access_token/', routes.index__org_repo_access_token);
+
+app.get('/oauth_getcode/', routes.oauth_getcode);
+app.get('/oauth_getcode/:org/:repo/', routes.oauth_getcode);
+
+app.get('/oauth_code_callback/', routes.oauth_code_callback);
+app.get('/oauth_code_callback/:org/:repo/', routes.oauth_code_callback);
+
+app.get('/stats/:org/:repo/:access_token/', routes.stats);
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
