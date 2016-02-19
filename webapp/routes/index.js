@@ -201,7 +201,7 @@ exports.stats = function(req, res){
 var get = function(host, path, cb) {
 	console.log("HOST", host);
 	console.log("PATH", path);
-	https.get({ host: host, path: path }, function(res){
+	https.get({ host: host, path: path, headers: {'User-Agent': 'DiN0bot/Developer-Stats'} }, function(res){
 		res.setEncoding('utf8');
 		var data = '';
 		res.on('data', function(d) {
@@ -230,7 +230,7 @@ var stats_page = function(req, res, org, repo, access_token){
 	console.log("HOST: "+host);
 	console.log("PATH: "+path)
 
-	https.get({ host: host, path: path }, function(ghres){
+	https.get({ host: host, path: path, headers: {'User-Agent': 'DiN0bot/Developer-Stats'} }, function(ghres){
 		console.log("statusCode: ", ghres.statusCode);
 		ghres.setEncoding('utf8');
 		var open_data = '';
@@ -251,7 +251,7 @@ var stats_page = function(req, res, org, repo, access_token){
 			console.log("HOST: "+host);
 			console.log("PATH: "+path)
 
-			https.get({ host: host, path: path }, function(ghres){
+			https.get({ host: host, path: path, headers: {'User-Agent': 'DiN0bot/Developer-Stats'} }, function(ghres){
 				console.log("statusCode: ", ghres.statusCode);
 				ghres.setEncoding('utf8');
 				var closed_data = '';
